@@ -69,7 +69,6 @@ so they print well.
 
 `npm run lint-fix`
 
-
 ### Fixing markdownlint -- line wrap
 
 Example with `README.md` file:
