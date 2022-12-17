@@ -65,5 +65,8 @@ so they print well.
 
 Example with `README.md` file:
 
-```bash fmt -w 80 README.md > README.md.temp; rm README.md; mv README.md.temp
-README.md ```
+```bash
+
+fmt -w 80 README.md > README.md.temp; rm README.md; mv README.md.temp README.md
+
+```
