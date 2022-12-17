@@ -208,8 +208,10 @@ examples:
 
     const startpage = imagesAsDataURL[0][0];
     const endpage = imagesAsDataURL[imagesAsDataURL.length - 1][0];
-    const title = "Pages " + startpage + " to " + endpage;
-    document.head.title = title;
+
+    const titleElm = document.createElement("title");
+    titleElm.innerHTML = "Pages " + startpage + " to " + endpage;
+    document.head.append(titleElm);
 
     document.body.attributes = "";
     const styleElm = document.createElement("style");
