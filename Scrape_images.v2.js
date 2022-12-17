@@ -1,4 +1,5 @@
-const PAGE_RANGE = [];
+// eslint-disable-next-line prefer-const
+let PAGE_RANGE = [];
 
 /*
 examples:
@@ -203,7 +204,7 @@ examples:
    *
    * @param {imagesAsDataURL} imagesAsDataURL
    */
-  async function printPages(imagesAsDataURL) {
+  function printPages(imagesAsDataURL) {
     clearDOM();
 
     const startpage = imagesAsDataURL[0][0];
@@ -235,7 +236,7 @@ examples:
 
   const imagesAsDataURL = await getPages(pageRange);
 
-  await printPages(imagesAsDataURL);
+  printPages(imagesAsDataURL);
 
   console.log("Ready to print...");
 })(PAGE_RANGE);
