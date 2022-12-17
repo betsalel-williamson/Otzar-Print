@@ -35,26 +35,43 @@ examples:
   /**
    * Get the page range for the current book
    *
+   * @param {string} bookScrollViewClassNames
+   *
+   * @param {string} pageBtnsScrollViewClassNames
+   *
+   * @param {string} pageButtonsClassName
+   *
+   * @param {int} numElemsToScroll
+   *
+   * @param {int} timeBetweenScrollMs
+   *
+   * @param {string} pageNumberAttributeName
+   *
    * @return {Promise<[int, int]>} [First page, Last page]
    */
-  async function getPageRange() {
+  async function getPageRange(
+    bookScrollViewClassNames = BOOK_SCROLL_VIEW_CLASS_NAMES,
+    pageBtnsScrollViewClassNames = PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES,
+    pageButtonsClassName = PAGE_BUTTONS_CLASS_NAME,
+    numElemsToScroll = NUM_ELEMS_TO_SCROLL,
+    timeBetweenScrollMs = TIME_BETWEEN_SCROLL_MS,
+    pageNumberAttributeName = PAGE_NUMBER_ATTRIBUTE_NAME
+  ) {
+    document.getElementsByClassName(bookScrollViewClassNames)[0].scrollTo(0, 0);
     document
-      .getElementsByClassName(BOOK_SCROLL_VIEW_CLASS_NAMES)[0]
-      .scrollTo(0, 0);
-    document
-      .getElementsByClassName(PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES)[0]
+      .getElementsByClassName(pageBtnsScrollViewClassNames)[0]
       .scrollTo(0, 0);
     await waitMs(10);
 
     const pages = new Set();
 
     const buttonHeightPx = Number(
-      document.getElementsByClassName(PAGE_BUTTONS_CLASS_NAME)[0].offsetHeight
+      document.getElementsByClassName(pageButtonsClassName)[0].offsetHeight
     );
-    const scrollbyPx = NUM_ELEMS_TO_SCROLL * buttonHeightPx;
+    const scrollbyPx = numElemsToScroll * buttonHeightPx;
 
     const scrollViewElm = document.getElementsByClassName(
-      PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES
+      pageBtnsScrollViewClassNames
     )[0];
 
     const scrollMax =
@@ -71,7 +88,7 @@ examples:
             scrollViewElm.scrollTo(0, scrollToPx);
             resolve();
           },
-          TIME_BETWEEN_SCROLL_MS,
+          timeBetweenScrollMs,
           scrollViewElm,
           scrollToPx
         );
@@ -81,10 +98,10 @@ examples:
       await new Promise((resolve) => {
         setTimeout(function () {
           const elms = document.querySelectorAll(
-            "[" + PAGE_NUMBER_ATTRIBUTE_NAME + "]"
+            "[" + pageNumberAttributeName + "]"
           );
           for (let i = 0; i < elms.length; i++) {
-            pages.add(Number(elms[i].getAttribute(PAGE_NUMBER_ATTRIBUTE_NAME)));
+            pages.add(Number(elms[i].getAttribute(pageNumberAttributeName)));
           }
           resolve();
         });
@@ -100,91 +117,134 @@ examples:
   /**
    * Adds two numbers together.
    *
-   * @param {pageRange} pageRange for all pages [], for start page to end page [start page, end page], from start page to end [start page]
+   * @param {int} pageNum
    *
-   * @return {Promise<[imagesAsDataURL]>}
+   * @param {int} maxAttempts
+   *
+   * @param {int} timeBeforePageDownloadsMs
+   *
+   * @param {int} pageNumberAttributeName
+   *
+   * @param {int} canvasPageNumberAttributeName
+   *
+   * @param {string} imageType
+   *
+   * @return {Promise<string>}
    */
-  async function getPages(pageRange) {
+  async function getPageAsDataURL(
+    pageNum,
+    maxAttempts = MAX_ATTEMPTS,
+    timeBeforePageDownloadsMs = TIME_BEFORE_PAGE_DOWNLOADS_MS,
+    pageNumberAttributeName = PAGE_NUMBER_ATTRIBUTE_NAME,
+    canvasPageNumberAttributeName = CANVAS_PAGE_NUMBER_ATTRIBUTE_NAME,
+    imageType = IMAGE_TYPE
+  ) {
+    console.time("page-" + pageNum);
+
+    const pageBtn = document.querySelector(
+      "[" + pageNumberAttributeName + '="' + pageNum + '"]'
+    );
+
+    if (!pageBtn) {
+      throw new Error("Unable to find page: " + pageNum);
+    }
+
+    console.log("Downloading page: " + pageNum);
+
+    let attempts = 0;
+    let imageAsDataURL = "";
+    pageBtn.click();
+
+    const blank = document.createElement("canvas");
+    while (true) {
+      attempts++;
+      if (attempts >= maxAttempts) {
+        console.error("Unable to download page: " + pageNum);
+        break;
+      }
+
+      await waitMs(timeBeforePageDownloadsMs);
+
+      const page = document.querySelector(
+        "[" + canvasPageNumberAttributeName + '="' + pageNum + '"]'
+      );
+
+      if (!page) {
+        if (document.getElementsByClassName("limited-container").length > 0) {
+          /* the page can't be loaded... */
+          console.timeEnd("page-" + pageNum);
+          console.warn("Page " + pageNum + " cannot be loaded due to paywall.");
+          break;
+        }
+        /* else, element not yet loaded... */
+        continue;
+      }
+
+      const canvas = page.parentElement.querySelector("canvas");
+      if (!canvas) {
+        /* element not yet loaded... */
+        continue;
+      }
+
+      imageAsDataURL = canvas.toDataURL(imageType);
+      blank.width = canvas.width;
+      blank.height = canvas.height;
+      const blankData = blank.toDataURL();
+
+      if (imageAsDataURL !== blankData) {
+        /* Success! */
+        console.timeEnd("page-" + pageNum);
+        break;
+      }
+    }
+
+    blank.remove();
+
+    return imageAsDataURL;
+  }
+
+  /**
+   * Adds two numbers together.
+   *
+   * @param {[int,int]} pageRange for all pages [], for start page to end page [start page, end page], from start page to end [start page]
+   *
+   * @param {string} bookScrollViewClassNames
+   *
+   * @param {string} pageBtnsScrollViewClassNames
+   *
+   * @return {Promise<[[pageNum, imageAsDataURL]]>}
+   */
+  async function getPages(
+    pageRange,
+    bookScrollViewClassNames = BOOK_SCROLL_VIEW_CLASS_NAMES,
+    pageBtnsScrollViewClassNames = PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES
+  ) {
     const [minPage, maxPage] = await getPageRange();
-    const startpage = pageRange[0] || minPage;
-    const endpage = pageRange[1] || maxPage;
+    const startPage = pageRange[0] || minPage;
+    const endPage = pageRange[1] || maxPage;
 
     const imagesAsDataURL = [];
 
+    document.getElementsByClassName(bookScrollViewClassNames)[0].scrollTo(0, 0);
     document
-      .getElementsByClassName(BOOK_SCROLL_VIEW_CLASS_NAMES)[0]
-      .scrollTo(0, 0);
-    document
-      .getElementsByClassName(PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES)[0]
+      .getElementsByClassName(pageBtnsScrollViewClassNames)[0]
       .scrollTo(0, 0);
 
     await waitMs(10);
 
-    for (let i = startpage; i <= endpage; i++) {
-      const pageBtn = document.querySelector(
-        "[" + PAGE_NUMBER_ATTRIBUTE_NAME + '="' + i + '"]'
-      );
-      if (pageBtn) {
-        console.time("page-" + i);
+    for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
+      const imageAsDataURL = await getPageAsDataURL(pageNum);
 
-        await new Promise(async (resolve) => {
-          console.log("Downloading page: " + i);
-
-          let attempts = 0;
-          const blank = document.createElement("canvas");
-          pageBtn.click();
-          while (true) {
-            attempts++;
-            if (attempts >= MAX_ATTEMPTS) {
-              console.error("Unable to download page: " + i);
-              break;
-            }
-
-            await waitMs(TIME_BEFORE_PAGE_DOWNLOADS_MS);
-
-            const page = document.querySelector(
-              "[" + CANVAS_PAGE_NUMBER_ATTRIBUTE_NAME + '="' + i + '"]'
-            );
-
-            if (!page) {
-              if (
-                document.getElementsByClassName("limited-container").length > 0
-              ) {
-                /* the page can't be loaded... */
-                console.timeEnd("page-" + i);
-                i = endpage;
-                break;
-              }
-              /* else, element not yet loaded... */
-              continue;
-            }
-
-            const canvas = page.parentElement.querySelector("canvas");
-            if (!canvas) {
-              /* element not yet loaded... */
-              continue;
-            }
-
-            const imageAsDataURL = canvas.toDataURL(IMAGE_TYPE);
-            blank.width = canvas.width;
-            blank.height = canvas.height;
-            const blankData = blank.toDataURL();
-
-            if (imageAsDataURL !== blankData) {
-              imagesAsDataURL.push([i, imageAsDataURL]);
-              break;
-            }
-          }
-
-          blank.remove();
-
-          resolve();
-        });
-
-        console.timeEnd("page-" + i);
-      } else {
-        throw new Error("Unable to find page: " + i);
+      if (imageAsDataURL === "") {
+        // no more data left
+        // since we are getting pages in sequence
+        console.warn(
+          "Will not download page(s): " + pageNum + " through " + endPage
+        );
+        break;
       }
+
+      imagesAsDataURL.push([pageNum, imageAsDataURL]);
     }
 
     return imagesAsDataURL;
