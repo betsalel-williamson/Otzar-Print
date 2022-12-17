@@ -53,6 +53,10 @@ clicks each page button and saves the image.  Finally, the image data is
 reloaded into a blank web page with CSS settings to properly display the images
 so they print well.
 
+### Project Setup
+
+`npm i`
+
 ### Generate minified file
 
 `npm run build`
