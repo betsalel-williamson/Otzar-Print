@@ -1,6 +1,7 @@
 # Otzar-Print
 
-Javascript in the browser to print pages from <otzar.org> (website version around 2022-12-17).
+Javascript in the browser to print pages from <otzar.org> (website version
+around 2022-12-17).
 
 ## How to Use
 
