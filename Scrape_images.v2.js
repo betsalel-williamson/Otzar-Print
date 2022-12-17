@@ -139,8 +139,6 @@ examples:
     canvasPageNumberAttributeName = CANVAS_PAGE_NUMBER_ATTRIBUTE_NAME,
     imageType = IMAGE_TYPE
   ) {
-    console.time("page-" + pageNum);
-
     const pageBtn = document.querySelector(
       "[" + pageNumberAttributeName + '="' + pageNum + '"]'
     );
@@ -159,7 +157,12 @@ examples:
     while (true) {
       attempts++;
       if (attempts >= maxAttempts) {
-        console.error("Unable to download page: " + pageNum);
+        console.error(
+          "After " +
+            maxAttempts +
+            " attempts, stopped trying to download page: " +
+            pageNum
+        );
         break;
       }
 
@@ -172,7 +175,6 @@ examples:
       if (!page) {
         if (document.getElementsByClassName("limited-container").length > 0) {
           /* the page can't be loaded... */
-          console.timeEnd("page-" + pageNum);
           console.warn("Page " + pageNum + " cannot be loaded due to paywall.");
           break;
         }
@@ -193,7 +195,6 @@ examples:
 
       if (imageAsDataURL !== blankData) {
         /* Success! */
-        console.timeEnd("page-" + pageNum);
         break;
       }
     }
@@ -233,7 +234,9 @@ examples:
     await waitMs(10);
 
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
+      console.time("page-" + pageNum);
       const imageAsDataURL = await getPageAsDataURL(pageNum);
+      console.timeEnd("page-" + pageNum);
 
       if (imageAsDataURL === "") {
         // no more data left
@@ -262,7 +265,7 @@ examples:
   /**
    * For the page range, get the images, and then display them for printing.
    *
-   * @param {imagesAsDataURL} imagesAsDataURL
+   * @param {[[pageNum, imageAsDataURL]]} imagesAsDataURL
    */
   function printPages(imagesAsDataURL) {
     clearDOM();
@@ -294,9 +297,13 @@ examples:
     }
   }
 
+  console.time("getPages-" + JSON.stringify(pageRange));
   const imagesAsDataURL = await getPages(pageRange);
+  console.timeEnd("getPages-" + JSON.stringify(pageRange));
 
+  console.time("printPages-len-" + imagesAsDataURL.length);
   printPages(imagesAsDataURL);
+  console.timeEnd("printPages-len-" + imagesAsDataURL.length);
 
   console.log("Ready to print...");
 })(PAGE_RANGE);
