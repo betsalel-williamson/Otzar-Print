@@ -9,7 +9,7 @@
     "parserOptions": {
         "ecmaVersion": "latest"
     },
-    "ignorePatterns": ["*.min.js"],
+    "ignorePatterns": ["*.min.js", "*.json"],
     "rules": {
     }
 }
