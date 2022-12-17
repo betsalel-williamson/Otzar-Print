@@ -1,0 +1,36 @@
+{
+  "name": "otzar-print",
+  "version": "1.0.0",
+  "description": "Javascript in the browser to print pages from otzar.org",
+  "main": "\"\"",
+  "scripts": {
+    "build": "$(npm bin)/minify Scrape_images.v2.js > Scrape_images.v2.min.js; sed -i .temp '1s/^/javascript\\:/' Scrape_images.v2.min.js; cat Scrape_images.v2.min.js | pbcopy",
+    "build-old": "$(npm bin)/minify Scrape_images.js > Scrape_images.min.js; sed -i .temp '1s/^/javascript\\:/' Scrape_images.min.js; cat Scrape_images.min.js | pbcopy",
+    "lint-fix": "$(npm bin)/eslint --fix *.js; $(npm bin)/markdownlint '**/*.md' --ignore node_modules --fix",
+    "lint": "$(npm bin)/eslint *.js; $(npm bin)/markdownlint '**/*.md' --ignore node_modules"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/betsalel-williamson/Otzar-Print.git"
+  },
+  "keywords": [
+    "scraper",
+    "otzar",
+    "javascript"
+  ],
+  "author": "Betsalel \"Saul\" Williamson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/betsalel-williamson/Otzar-Print/issues"
+  },
+  "homepage": "https://github.com/betsalel-williamson/Otzar-Print#readme",
+  "devDependencies": {
+    "eslint": "^8.30.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "markdownlint-cli": "^0.32.2",
+    "minify": "^9.1.0",
+    "prettier": "^2.8.1"
+  }
+}
