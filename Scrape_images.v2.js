@@ -8,6 +8,11 @@ examples:
 3. from start page to end: PAGE_RANGE = [3];
 */
 (async function (pageRange) {
+  /*
+   * @param {[int,int]} pageRange for all pages [], for start page to end page [start page, end page], from start page to end [start page]
+   * The start and end pages must be in range
+   */
+
   /* Global Constants */
   const TIME_BEFORE_PAGE_DOWNLOADS_MS = 25;
   const MAX_ATTEMPTS = 400;
@@ -35,21 +40,21 @@ examples:
   /**
    * Get the page range for the current book
    *
-   * @param {string} bookScrollViewClassNames
+   * @param {string} bookScrollViewClassNames default supplied
    *
-   * @param {string} pageBtnsScrollViewClassNames
+   * @param {string} pageBtnsScrollViewClassNames default supplied
    *
-   * @param {string} pageButtonsClassName
+   * @param {string} pageButtonsClassName default supplied
    *
-   * @param {int} numElemsToScroll
+   * @param {int} numElemsToScroll default supplied
    *
-   * @param {int} timeBetweenScrollMs
+   * @param {int} timeBetweenScrollMs default supplied
    *
-   * @param {string} pageNumberAttributeName
+   * @param {string} pageNumberAttributeName default supplied
    *
    * @return {Promise<[int, int]>} [First page, Last page]
    */
-  async function getPageRange(
+  async function getPagesRange(
     bookScrollViewClassNames = BOOK_SCROLL_VIEW_CLASS_NAMES,
     pageBtnsScrollViewClassNames = PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES,
     pageButtonsClassName = PAGE_BUTTONS_CLASS_NAME,
@@ -117,17 +122,17 @@ examples:
   /**
    * Adds two numbers together.
    *
-   * @param {int} pageNum
+   * @param {int} pageNum the page to dowload data from
    *
-   * @param {int} maxAttempts
+   * @param {int} maxAttempts default supplied. maxAttempts * timeBeforePageDownloadsMs = total time spent waiting to download
    *
-   * @param {int} timeBeforePageDownloadsMs
+   * @param {int} timeBeforePageDownloadsMs default supplied. maxAttempts * timeBeforePageDownloadsMs = total time spent waiting to download
    *
-   * @param {int} pageNumberAttributeName
+   * @param {int} pageNumberAttributeName default supplied
    *
-   * @param {int} canvasPageNumberAttributeName
+   * @param {int} canvasPageNumberAttributeName default supplied
    *
-   * @param {string} imageType
+   * @param {string} imageType default supplied
    *
    * @return {Promise<string>}
    */
@@ -207,23 +212,22 @@ examples:
   /**
    * Adds two numbers together.
    *
-   * @param {[int,int]} pageRange for all pages [], for start page to end page [start page, end page], from start page to end [start page]
+   * @param {int} startPage
    *
-   * @param {string} bookScrollViewClassNames
+   * @param {int} endPage
    *
-   * @param {string} pageBtnsScrollViewClassNames
+   * @param {string} bookScrollViewClassNames defaults supplied
+   *
+   * @param {string} pageBtnsScrollViewClassNames defaults supplied
    *
    * @return {Promise<[[pageNum, imageAsDataURL]]>}
    */
   async function getPages(
-    pageRange,
+    startPage,
+    endPage,
     bookScrollViewClassNames = BOOK_SCROLL_VIEW_CLASS_NAMES,
     pageBtnsScrollViewClassNames = PAGE_BTNS_SCROLL_VIEW_CLASS_NAMES
   ) {
-    const [minPage, maxPage] = await getPageRange();
-    const startPage = pageRange[0] || minPage;
-    const endPage = pageRange[1] || maxPage;
-
     const imagesAsDataURL = [];
 
     document.getElementsByClassName(bookScrollViewClassNames)[0].scrollTo(0, 0);
@@ -265,7 +269,7 @@ examples:
   /**
    * For the page range, get the images, and then display them for printing.
    *
-   * @param {[[pageNum, imageAsDataURL]]} imagesAsDataURL
+   * @param {[[int, string]]} imagesAsDataURL array of tuples [ page number, image as data url ]
    */
   function printPages(imagesAsDataURL) {
     clearDOM();
@@ -297,9 +301,16 @@ examples:
     }
   }
 
-  console.time("getPages-" + JSON.stringify(pageRange));
-  const imagesAsDataURL = await getPages(pageRange);
-  console.timeEnd("getPages-" + JSON.stringify(pageRange));
+  console.time("getPagesRange");
+  const [minPage, maxPage] = await getPagesRange();
+  console.timeEnd("getPagesRange");
+
+  const startPage = pageRange[0] || minPage;
+  const endPage = pageRange[1] || maxPage;
+
+  console.time("getPages-" + startPage + "-to-" + endPage);
+  const imagesAsDataURL = await getPages(startPage, endPage);
+  console.timeEnd("getPages-" + startPage + "-to-" + endPage);
 
   console.time("printPages-len-" + imagesAsDataURL.length);
   printPages(imagesAsDataURL);
