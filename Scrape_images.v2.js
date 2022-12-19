@@ -4,8 +4,8 @@ let PAGE_RANGE = [];
 /*
 examples:
 1. all pages: PAGE_RANGE = [];
-2. selected pages: PAGE_RANGE = [1,27];
-3. from start page to end: PAGE_RANGE = [3];
+2. selected pages from start page through end page: PAGE_RANGE = [1,27];
+3. from start page to end of book: PAGE_RANGE = [3];
 */
 (async function (pageRange) {
   /*
