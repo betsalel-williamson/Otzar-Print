@@ -9,7 +9,7 @@ around 2022-12-17).
 <https://tablet.otzar.org/#/b/169812/p/1/t/1670820464770/fs/0/start/0/end/0/c>).
 
 2. Copy the minified script `Scrape_images.v2.min.js` (contents starts with
-`javascript:var...`) into a text editor.
+`javascript:...`) into a text editor.
 
 3. Choose one of the following methods:
 
