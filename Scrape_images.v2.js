@@ -120,7 +120,7 @@ examples:
   }
 
   /**
-   * Adds two numbers together.
+   * Get the page as an data URL encoded image.
    *
    * @param {int} pageNum the page to dowload data from
    *
@@ -210,7 +210,7 @@ examples:
   }
 
   /**
-   * Adds two numbers together.
+   * Get pages from start to end as data URL encoded images.
    *
    * @param {int} startPage
    *
